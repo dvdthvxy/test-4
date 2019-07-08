@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <style>
+        [type=file],
+        canvas {
+            display: block;
+        }
+    </style>
+    <title>Document</title>
+</head>
+
+<body>
+
+    <input type="file" id="file">
+
+    <canvas id="carMakeChart"></canvas>
+    <canvas id="ageChart"></canvas>
+
+    <script src='https://code.jquery.com/jquery-3.2.1.min.js'
+        integrity='sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4=' crossorigin='anonymous'></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@2.8.0"></script>
+    <script>
+        function Info(id, date, firstName, lastname, email,
+            gender, ip, companyName, companyDomain, address, country, carMake, color, model, age) {
+
+            this.id = id,
+                this.date = date,
+                this.firstName = firstName,
+                this.lastname = lastname,
+                this.email = email,
+                this.gender = gender,
+                this.ip = ip,
+                this.companyName = companyName,
+                this.companyDomain = companyDomain,
+                this.address = address,
+                this.country = country,
+                this.carMake = carMake,
+                this.carColor = color,
+                this.carModel = model,
+                this.age = age
+        }
+        
+        $(function () {
+
+            function ageFinder(obj, min, max) {
+                return obj.reduce((total, accumulator) => {
+                    if (accumulator.age >= min && accumulator.age <= max) {
+                        return total + 1
+                    } else {
+                        return total
+                    }
+                }, 0)
+            }
+
+            function carMake(obj) {
+                const make = {}
+                obj.forEach(person => {
+                    if (person.carMake in make) {
+                        make[person.carMake] += 1
+                    } else {
+                        make[person.carMake] = 1
+                    }
+                })
+                return make
+            }
+
+            function getTotal(obj) {
+                const totalArray = []
+                for(item in obj) {
+                    totalArray.push(obj[item])
+                }
+                return totalArray
+            }
+
+            const fileInput = document.getElementById('file')
+            const list = document.getElementById('list')
+            const reader = new FileReader()
+            const dataObj = []
+
+            // const file = fileInput.files;
+
+            fileInput.addEventListener('change', event => {
+                const file = fileInput.files[0];
+
+                reader.readAsText(file)
+                reader.onload = function (e) {
+                    const results = reader.result
+                    // const regex = /(.*\r)/gi;
+                    const regex = /(.+\,.+)/gi
+                    const array = results.split(regex)
+                    const data = array.filter(index => index.length > 2)
+                    const splitArray = []
+                    data.forEach(word => {
+                        splitArray.push(word.split(','))
+                    });
+
+
+                    splitArray.map(word => {
+                        if (word.length > 15) {
+                            word[7] = `${word[7]},${word[8]}`
+                            word.splice(8, 1)
+                            dataObj.push(new Info(...word))
+                        } else {
+                            dataObj.push(new Info(...word))
+                        }
+
+                    })
+
+                    dataObj.shift()
+
+                    const totalCarsOwnedByBrand = carMake(dataObj)
+
+                    const ctx1 = document.getElementById('ageChart').getContext('2d');
+                    const ageChart = new Chart(ctx1, {
+                        // The type of chart we want to create
+                        type: 'bar',
+
+                        // The data for our dataset
+                        data: {
+                            labels: ['16 - 19', '20 - 24', '25 - 29', '30 - 34', '35 - 39', '40 - 44', '45 - 49', '50 - 54', '55 - 60', '60 and up'],
+                            datasets: [{
+                                label: 'Car Owner Age Groups',
+                                backgroundColor: 'steelblue',
+                                // borderColor: 'rgb(255, 99, 132)',
+                                data: [ageFinder(dataObj, 16, 19), ageFinder(dataObj, 20, 24), ageFinder(dataObj, 25, 29), ageFinder(dataObj, 30, 34), ageFinder(dataObj, 35, 39), ageFinder(dataObj, 40, 44), ageFinder(dataObj, 45, 49), ageFinder(dataObj, 50, 54), ageFinder(dataObj, 55, 59), ageFinder(dataObj, 60, 100),]
+                            }]
+                        },
+
+                        // Configuration options go here
+                        options: {}
+                    });
+
+                    var ctx2 = document.getElementById('carMakeChart').getContext('2d');
+                    var carMakeChart = new Chart(ctx2, {
+                        // The type of chart we want to create
+                        type: 'horizontalBar',
+
+                        // The data for our dataset
+                        data: {
+                            labels: Object.keys(totalCarsOwnedByBrand),
+                            datasets: [{
+                                label: 'Car Ownership by Brand',
+                                backgroundColor: 'rgb(255, 99, 132)',
+                                // borderColor: 'rgb(255, 99, 132)',
+                                data: getTotal(totalCarsOwnedByBrand)
+                            }]
+                        },
+
+                        // Configuration options go here
+                        options: {}
+                    });
+                }
+            });
+
+        })
+    </script>
+</body>
+
+</html>
