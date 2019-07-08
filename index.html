@@ -45,37 +45,38 @@
                 this.age = age
         }
         
+        function ageFinder(obj, min, max) {
+            return obj.reduce((total, accumulator) => {
+                if (accumulator.age >= min && accumulator.age <= max) {
+                    return total + 1
+                } else {
+                    return total
+                }
+            }, 0)
+        }
+
+        function carMake(obj) {
+            const make = {}
+            obj.forEach(person => {
+                if (person.carMake in make) {
+                    make[person.carMake] += 1
+                } else {
+                    make[person.carMake] = 1
+                }
+            })
+            return make
+        }
+
+        function getTotal(obj) {
+            const totalArray = []
+            for(item in obj) {
+                totalArray.push(obj[item])
+            }
+            return totalArray
+        }
+        
         $(function () {
 
-            function ageFinder(obj, min, max) {
-                return obj.reduce((total, accumulator) => {
-                    if (accumulator.age >= min && accumulator.age <= max) {
-                        return total + 1
-                    } else {
-                        return total
-                    }
-                }, 0)
-            }
-
-            function carMake(obj) {
-                const make = {}
-                obj.forEach(person => {
-                    if (person.carMake in make) {
-                        make[person.carMake] += 1
-                    } else {
-                        make[person.carMake] = 1
-                    }
-                })
-                return make
-            }
-
-            function getTotal(obj) {
-                const totalArray = []
-                for(item in obj) {
-                    totalArray.push(obj[item])
-                }
-                return totalArray
-            }
 
             const fileInput = document.getElementById('file')
             const list = document.getElementById('list')
